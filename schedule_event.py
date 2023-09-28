@@ -27,7 +27,7 @@ def schedule_event(email, title, description, start, end, grant_id):
     end_unix_timestamp = int(parser.parse(end).timestamp())
 
     # create the event on the primary calendar
-    event, _ = nylas.events.create(
+    event, request_id = nylas.events.create(
         identifier=grant_id,
         request_body=dict(
             calendar_id="primary",
