@@ -36,7 +36,7 @@ def delete_test_events(grant_id, yes):
         if yes or user_inputs_y("Do you want to delete these events?"):
             for event in test_events:
                 print("* Deleting event with ID {}".format(event.id))
-                deleted, request_id = nylas.events.destroy(
+                nylas.events.destroy(
                     grant_id,
                     event.id,
                     dict(calendar_id="primary"),
