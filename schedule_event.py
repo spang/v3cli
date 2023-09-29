@@ -36,7 +36,7 @@ def schedule_event(email, title, description, start, end, grant_id):
             when={"start_time": start_unix_timestamp, "end_time": end_unix_timestamp},
         ),
         query_params=dict(
-            calendar_id=primary_calendar.id,
+            calendar_id="primary",
             notify_participants=True,
         ),
     )
