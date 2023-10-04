@@ -104,7 +104,7 @@ def schedule_event_during_availability(
                 "start_time": earliest_time_slot,
                 "end_time": earliest_time_slot + duration * 60,
             },
-            participants=[{"email": guest_email}, {"email": me_email}],
+            participants=[{"email": guest_email}, {"email": me_email, "status": "yes"}],
         ),
         query_params=dict(
             calendar_id="primary",
