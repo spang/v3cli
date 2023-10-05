@@ -75,14 +75,14 @@ def schedule_event_during_availability(
         ),
     )
 
-    # TODO: make this handle errors for my calendar as well -- also pretty
-    # sure there is a bug in this and it's not checking the correct error
-    if freebusy_response["data"][0]["object"] == "error":
-        print(
-            "Error fetching availability for {}: {}".format(
-                guest_email, freebusy_response["data"][0]["error"]
+    errors = [elt for elt in freebusy_response["data"] if elt["object"] == "error"]
+    if errors:
+        for error in errors:
+            print(
+                "Error fetching availability for {}: {}".format(
+                    error["email"], error["error"]
+                )
             )
-        )
         return
 
     print("Call successful")
