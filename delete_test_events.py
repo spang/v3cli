@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 import os
-from datetime import datetime
 
 import click
-from dateutil import parser
 
 import nylas as nylasSDK
 
