@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import os
 
+from dateutil import tz
+
 import click
 import arrow
 
@@ -136,8 +138,9 @@ def main(email, title, description, start, end, duration, notify):
 
     grant_metadata, request_id = nylas.auth.grants.find("me")
 
-    start_unix_timestamp = int(arrow.get(start).timestamp())
-    end_unix_timestamp = int(arrow.get(end).timestamp())
+    local_tz = tz.tzlocal()
+    start_unix_timestamp = int(arrow.get(start, tzinfo=local_tz).timestamp())
+    end_unix_timestamp = int(arrow.get(end, tzinfo=local_tz).timestamp())
 
     print("Will check availability for the following emails: {}".format(email))
 
