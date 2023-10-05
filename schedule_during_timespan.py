@@ -8,6 +8,11 @@ import arrow
 
 import nylas as nylasSDK
 
+# TODO / wishlist: support buffers between scheduled meetings, abide by the
+# user's configured working hours (not supported via Nylas yet), limiting the
+# number of meetings scheduled per day (to e.g. 2), other strategies to prevent
+# bunching
+
 # note: this env var can be an app api key OR an access token
 NYLAS_API_KEY = os.environ.get("NYLAS_API_KEY")
 if not NYLAS_API_KEY:
