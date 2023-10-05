@@ -18,7 +18,10 @@ if not NYLAS_API_KEY:
 @click.option("--start", "-s", help="Start date of event")
 @click.option("--end", help="End date of event")
 @click.option("--grant-id", "-g", help="Grant ID")
-def schedule_event(email, title, description, start, end, grant_id):
+@click.option(
+    "--notify/--no-notify", default=True, help="Whether to notify participants"
+)
+def schedule_event(email, title, description, start, end, grant_id, notify):
     """Schedule an event with Nylas"""
     nylas = nylasSDK.Client(api_key=NYLAS_API_KEY)
 
@@ -35,7 +38,7 @@ def schedule_event(email, title, description, start, end, grant_id):
         ),
         query_params=dict(
             calendar_id="primary",
-            notify_participants=True,
+            notify_participants=notify,
         ),
     )
     print("Event created with ID: {}".format(event.id))

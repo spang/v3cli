@@ -63,7 +63,7 @@ def find_available_slot(api_response, duration, start_time, end_time):
 
 
 def schedule_event_during_availability(
-    guest_email, me_email, title, description, start, end, duration
+    guest_email, me_email, title, description, start, end, duration, notify
 ):
     """Schedule an individual event with the given email's calendar"""
     freebusy_response, request_id = nylas.calendars.get_free_busy(
@@ -107,7 +107,7 @@ def schedule_event_during_availability(
         ),
         query_params=dict(
             calendar_id="primary",
-            notify_participants=True,
+            notify_participants=notify,
         ),
     )
     print(
@@ -124,9 +124,12 @@ def schedule_event_during_availability(
 @click.option("--start", "-s", help="Start date of availability search")
 @click.option("--end", help="End date of availability search")
 @click.option(
+    "--notify/--no-notify", default=True, help="Whether to notify participants"
+)
+@click.option(
     "--duration", default=30, type=int, help="How long the meeting will be in minutes"
 )
-def main(email, title, description, start, end, duration):
+def main(email, title, description, start, end, duration, notify):
     """For each guest specified, schedule a meeting between the guest and
     the authorized user with the given title and description. Event will
     occur during an available time block within the given start and end"""
@@ -147,6 +150,7 @@ def main(email, title, description, start, end, duration):
             start_unix_timestamp,
             end_unix_timestamp,
             duration,
+            notify,
         )
 
 

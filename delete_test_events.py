@@ -18,7 +18,10 @@ def user_inputs_y(message):
 @click.command()
 @click.option("--grant-id", "-g", default="me", help="Grant ID")
 @click.option("--yes", "-y", help="skip prompting")
-def delete_test_events(grant_id, yes):
+@click.option(
+    "--notify/--no-notify", default=True, help="Whether to notify participants"
+)
+def delete_test_events(grant_id, yes, notify):
     """Delete all events on the primary calendar matching the title 'test event'"""
     nylas = nylasSDK.Client(api_key=NYLAS_API_KEY)
 
@@ -37,7 +40,7 @@ def delete_test_events(grant_id, yes):
                 nylas.events.destroy(
                     grant_id,
                     event.id,
-                    dict(calendar_id="primary"),
+                    dict(calendar_id="primary", notify_participants=notify),
                 )
 
 
