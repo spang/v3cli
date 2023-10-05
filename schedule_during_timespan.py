@@ -97,7 +97,6 @@ def schedule_event_during_availability(
     create_response, request_id = nylas.events.create(
         identifier="me",
         request_body=dict(
-            calendar_id="primary",
             title=title,
             description=description,
             when={

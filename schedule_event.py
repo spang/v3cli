@@ -30,7 +30,6 @@ def schedule_event(email, title, description, start, end, grant_id):
     event, request_id = nylas.events.create(
         identifier=grant_id,
         request_body=dict(
-            calendar_id="primary",
             title=title,
             description=description,
             when={"start_time": start_unix_timestamp, "end_time": end_unix_timestamp},
