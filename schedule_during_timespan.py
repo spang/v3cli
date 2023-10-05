@@ -132,7 +132,7 @@ def main(email, title, description, start, end, duration):
     the authorized user with the given title and description. Event will
     occur during an available time block within the given start and end"""
 
-    grant_metadata, request_id = nylas.grants.find("me")
+    grant_metadata, request_id = nylas.auth.grants.find("me")
 
     start_unix_timestamp = int(arrow.get(start).timestamp())
     end_unix_timestamp = int(arrow.get(end).timestamp())
