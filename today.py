@@ -67,6 +67,8 @@ def today(grant_id):
             print(
                 "* {} at {}".format(event.title, timespan_to_human_readable(event.when))
             )
+    else:
+        print("No meetings today! You're free as a bird!")
 
 
 if __name__ == "__main__":
