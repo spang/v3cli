@@ -53,13 +53,18 @@ def count_tokens(text):
     return len(enc.encode(text))
 
 
-def remove_css_from_email(email_content):
+def remove_css_and_inline_styles_from_email(email_content):
     # Parse the email content with BeautifulSoup
     soup = BeautifulSoup(email_content, "html.parser")
 
     # Find and extract all <style> tags
     for style_tag in soup.find_all("style"):
         style_tag.decompose()
+
+    for tag in soup.find_all(style=True):
+        del tag["style"]  # Remove the style attribute
+
+    return str(soup)
 
     # Return the processed email content
     return str(soup)
@@ -100,7 +105,7 @@ def main(email):
             email_text = email_file.read()
 
         print("Estimated tokens from email: {}".format(count_tokens(email_text)))
-        css_stripped_email = remove_css_from_email(email_text)
+        css_stripped_email = remove_css_and_inline_styles_from_email(email_text)
         print(
             "Estimated tokens from email with CSS stripped: {}".format(
                 count_tokens(css_stripped_email)
@@ -112,7 +117,7 @@ def main(email):
         )
         use_this_version = body_only
 
-        if count_tokens(use_this_version) > 16000:
+        if count_tokens(use_this_version) > 16385:
             print("Token length too long")
             return
 
