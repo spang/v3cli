@@ -17,6 +17,89 @@ OPENAI_MODEL = "gpt-3.5-turbo-16k"
 # optional, so don't error out if this doesn't exist
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", None)
 
+JSON_SCHEMA = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "flight_details": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "flight_number": {"type": "string"},
+                    "class": {"type": "string"},
+                    "departure_date": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z]{3}, [A-Za-z]{3} \\d{2}, \\d{4}$",
+                    },
+                    "departure_time": {
+                        "type": "string",
+                        "pattern": "^\\d{2}:\\d{2} [APM]{2}$",
+                    },
+                    "arrival_date": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z]{3}, [A-Za-z]{3} \\d{2}, \\d{4}$",
+                    },
+                    "arrival_time": {
+                        "type": "string",
+                        "pattern": "^\\d{2}:\\d{2} [APM]{2}$",
+                    },
+                    "departure_city": {"type": "string"},
+                    "arrival_city": {"type": "string"},
+                    "operated_by": {"type": "string"},
+                },
+                "required": [
+                    "flight_number",
+                    "class",
+                    "departure_date",
+                    "departure_time",
+                    "arrival_date",
+                    "arrival_time",
+                    "departure_city",
+                    "arrival_city",
+                    "operated_by",
+                ],
+            },
+        },
+        "passenger_details": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "eticket_number": {"type": "string"},
+                    "frequent_flyer": {"type": "string"},
+                    "seats": {"type": "string"},
+                },
+                "required": ["name", "eticket_number", "frequent_flyer", "seats"],
+            },
+        },
+        "purchase_summary": {
+            "type": "object",
+            "properties": {
+                "method_of_payment": {"type": "string"},
+                "date_of_purchase": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z]{3}, [A-Za-z]{3} \\d{2}, \\d{4}$",
+                },
+                "airfare": {"type": "string"},
+                "taxes_and_fees": {"type": "string"},
+                "total_per_passenger": {"type": "string"},
+                "total": {"type": "string"},
+            },
+            "required": [
+                "method_of_payment",
+                "date_of_purchase",
+                "airfare",
+                "taxes_and_fees",
+                "total_per_passenger",
+                "total",
+            ],
+        },
+    },
+    "required": ["flight_details", "passenger_details", "purchase_summary"],
+}
+
 
 def time_this_function(func):
     @functools.wraps(func)
@@ -80,6 +163,8 @@ def extract_flight_details_openai(email_text):
 
     response = openai.ChatCompletion.create(
         model=OPENAI_MODEL,
+        functions=[{"name": "set_flight_data", "parameters": JSON_SCHEMA}],
+        function_call={"name": "set_flight_data"},
         messages=[
             {
                 "role": "system",
@@ -90,7 +175,7 @@ def extract_flight_details_openai(email_text):
     )
 
     if response and response.choices:
-        return response.choices[0].message["content"]
+        return response.choices[0].message["function_call"]["arguments"]
     else:
         return None
 
