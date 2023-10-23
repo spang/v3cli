@@ -1,17 +1,21 @@
+import anthropic
 import click
 import json
 import openai
 import tiktoken
 import os
+import re
 import email
 import functools
 import time
 
 from bs4 import BeautifulSoup
 
-# Set your OpenAI API key from the environment variable
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_MODEL = "gpt-3.5-turbo-16k"
+
+# optional, so don't error out if this doesn't exist
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", None)
 
 
 def time_this_function(func):
@@ -70,9 +74,8 @@ def remove_css_and_inline_styles_from_email(email_content):
     return str(soup)
 
 
-# Function to extract flight details using GPT API
 @time_this_function
-def extract_flight_details(email_text):
+def extract_flight_details_openai(email_text):
     openai.api_key = OPENAI_API_KEY
 
     response = openai.ChatCompletion.create(
@@ -92,6 +95,26 @@ def extract_flight_details(email_text):
         return None
 
 
+@time_this_function
+def extract_flight_details_anthropic(email_text):
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+
+    response = client.completions.create(
+        model="claude-2",
+        max_tokens_to_sample=10000,
+        prompt=f"Human: Extract flight details from the following email inside <email></email> XML tags and return it in JSON format between <json></json> XML tags.:\n\n<email>{email_text}</email>\n\nAssistant:",
+    )
+
+    # I can't figure out how to get Claude to be concise so I'm using XML tags instead
+    if response and response.completion:
+        text = response.completion
+        match = re.search(r"<json>(.*?)</json>", text, re.DOTALL)
+        if match:
+            return match.group(1)
+
+    return None
+
+
 @click.command()
 @click.option(
     "-e",
@@ -99,29 +122,43 @@ def extract_flight_details(email_text):
     type=click.Path(exists=True),
     help="Path to the input .eml email file",
 )
-def main(email):
+@click.option(
+    "-a",
+    "--anthropic",
+    is_flag=True,
+    default=False,
+    help="Use Anthropic to parse instead of OpenAI",
+)
+def main(email, anthropic):
     try:
         with open(email, "r", encoding="utf-8") as email_file:
             email_text = email_file.read()
 
-        print("Estimated tokens from email: {}".format(count_tokens(email_text)))
-        css_stripped_email = remove_css_and_inline_styles_from_email(email_text)
-        print(
-            "Estimated tokens from email with CSS stripped: {}".format(
-                count_tokens(css_stripped_email)
+        use_this_version = email_text
+
+        if anthropic:
+            flight_details = extract_flight_details_anthropic(use_this_version)
+        else:
+            print("Estimated tokens from email: {}".format(count_tokens(email_text)))
+            css_stripped_email = remove_css_and_inline_styles_from_email(email_text)
+            print(
+                "Estimated tokens from email with CSS stripped: {}".format(
+                    count_tokens(css_stripped_email)
+                )
             )
-        )
-        body_only = email_body_only(email_text)
-        print(
-            "Estimated tokens from email body only: {}".format(count_tokens(body_only))
-        )
-        use_this_version = body_only
+            body_only = email_body_only(email_text)
+            print(
+                "Estimated tokens from email body only: {}".format(
+                    count_tokens(body_only)
+                )
+            )
+            use_this_version = body_only
 
-        if count_tokens(use_this_version) > 16385:
-            print("Token length too long")
-            return
+            if count_tokens(use_this_version) > 16385:
+                print("Token length too long")
+                return
 
-        flight_details = extract_flight_details(use_this_version)
+            flight_details = extract_flight_details_openai(use_this_version)
 
         if flight_details:
             parsed_data = json.loads(flight_details)
