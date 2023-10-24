@@ -13,6 +13,7 @@ from strip_tags import strip_tags
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_MODEL = "gpt-3.5-turbo-16k"
+OPENAI_TOKEN_LIMIT = 16385
 
 # optional, so don't error out if this doesn't exist
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", None)
@@ -232,7 +233,7 @@ def main(email, anthropic):
             )
             use_this_version = stripped_email
 
-            if count_tokens(use_this_version) > 16385:
+            if count_tokens(use_this_version) > OPENAI_TOKEN_LIMIT:
                 print("Token length too long")
                 return
 
