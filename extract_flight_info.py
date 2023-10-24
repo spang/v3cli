@@ -9,7 +9,7 @@ import email
 import functools
 import time
 
-from bs4 import BeautifulSoup
+from strip_tags import strip_tags
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_MODEL = "gpt-3.5-turbo-16k"
@@ -141,20 +141,13 @@ def count_tokens(text):
 
 
 def remove_css_and_inline_styles_from_email(email_content):
-    # Parse the email content with BeautifulSoup
-    soup = BeautifulSoup(email_content, "html.parser")
+    stripped = strip_tags(
+        email_content,
+        minify=True,
+        keep_tags=["table", "tr", "td", "head", "div", "br"],
+    )
 
-    # Find and extract all <style> tags
-    for style_tag in soup.find_all("style"):
-        style_tag.decompose()
-
-    for tag in soup.find_all(style=True):
-        del tag["style"]  # Remove the style attribute
-
-    return str(soup)
-
-    # Return the processed email content
-    return str(soup)
+    return stripped
 
 
 @time_this_function
@@ -225,19 +218,19 @@ def main(email, anthropic):
             flight_details = extract_flight_details_anthropic(use_this_version)
         else:
             print("Estimated tokens from email: {}".format(count_tokens(email_text)))
-            css_stripped_email = remove_css_and_inline_styles_from_email(email_text)
-            print(
-                "Estimated tokens from email with CSS stripped: {}".format(
-                    count_tokens(css_stripped_email)
-                )
-            )
             body_only = email_body_only(email_text)
             print(
                 "Estimated tokens from email body only: {}".format(
                     count_tokens(body_only)
                 )
             )
-            use_this_version = body_only
+            css_stripped_email = remove_css_and_inline_styles_from_email(body_only)
+            print(
+                "Estimated tokens from email with CSS stripped: {}".format(
+                    count_tokens(css_stripped_email)
+                )
+            )
+            use_this_version = css_stripped_email
 
             if count_tokens(use_this_version) > 16385:
                 print("Token length too long")
