@@ -197,6 +197,38 @@ def extract_flight_details_anthropic(email_text):
     return None
 
 
+def extract_flight_details(email_text, anthropic):
+    """Return JSON of flight details from email text"""
+    use_this_version = email_text
+
+    if anthropic:
+        flight_details = extract_flight_details_anthropic(use_this_version)
+    else:
+        print("Estimated tokens from email: {}".format(count_tokens(email_text)))
+        body_only = email_body_only(email_text)
+        print(
+            "Estimated tokens from email body only: {}".format(count_tokens(body_only))
+        )
+        stripped_email = strip_tags_from_email(body_only)
+        print(
+            "Estimated tokens from email with tags stripped: {}".format(
+                count_tokens(stripped_email)
+            )
+        )
+        use_this_version = stripped_email
+
+        if count_tokens(use_this_version) > OPENAI_TOKEN_LIMIT:
+            print("Token length too long")
+            return
+
+        flight_details = extract_flight_details_openai(use_this_version)
+
+    if flight_details:
+        return json.loads(flight_details)
+    else:
+        return {}
+
+
 @click.command()
 @click.option(
     "-e",
@@ -216,37 +248,12 @@ def main(email, anthropic):
         with open(email, "r", encoding="utf-8") as email_file:
             email_text = email_file.read()
 
-        use_this_version = email_text
-
-        if anthropic:
-            flight_details = extract_flight_details_anthropic(use_this_version)
+        flight_details_json = extract_flight_details(email_text, anthropic)
+        if flight_details_json:
+            print(json.dumps(flight_details_json, indent=4))
         else:
-            print("Estimated tokens from email: {}".format(count_tokens(email_text)))
-            body_only = email_body_only(email_text)
-            print(
-                "Estimated tokens from email body only: {}".format(
-                    count_tokens(body_only)
-                )
-            )
-            stripped_email = strip_tags_from_email(body_only)
-            print(
-                "Estimated tokens from email with tags stripped: {}".format(
-                    count_tokens(stripped_email)
-                )
-            )
-            use_this_version = stripped_email
+            print("No flight details found")
 
-            if count_tokens(use_this_version) > OPENAI_TOKEN_LIMIT:
-                print("Token length too long")
-                return
-
-            flight_details = extract_flight_details_openai(use_this_version)
-
-        if flight_details:
-            parsed_data = json.loads(flight_details)
-            print(json.dumps(parsed_data, indent=4))
-        else:
-            print("Failed to extract flight details from the email.")
     except FileNotFoundError:
         print(f"File not found: {email}")
 
