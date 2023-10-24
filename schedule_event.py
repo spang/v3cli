@@ -17,7 +17,7 @@ if not NYLAS_API_KEY:
 @click.option("--description", "-d", help="Description of event")
 @click.option("--start", "-s", help="Start date of event")
 @click.option("--end", help="End date of event")
-@click.option("--grant-id", "-g", help="Grant ID")
+@click.option("--grant-id", "-g", default="me", help="Grant ID")
 @click.option(
     "--notify/--no-notify", default=True, help="Whether to notify participants"
 )
