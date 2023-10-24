@@ -140,7 +140,7 @@ def count_tokens(text):
     return len(enc.encode(text))
 
 
-def remove_css_and_inline_styles_from_email(email_content):
+def strip_tags_from_email(email_content):
     stripped = strip_tags(
         email_content,
         minify=True,
@@ -224,13 +224,13 @@ def main(email, anthropic):
                     count_tokens(body_only)
                 )
             )
-            css_stripped_email = remove_css_and_inline_styles_from_email(body_only)
+            stripped_email = strip_tags_from_email(body_only)
             print(
-                "Estimated tokens from email with CSS stripped: {}".format(
-                    count_tokens(css_stripped_email)
+                "Estimated tokens from email with tags stripped: {}".format(
+                    count_tokens(stripped_email)
                 )
             )
-            use_this_version = css_stripped_email
+            use_this_version = stripped_email
 
             if count_tokens(use_this_version) > 16385:
                 print("Token length too long")
