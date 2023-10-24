@@ -29,36 +29,39 @@ JSON_SCHEMA = {
                 "properties": {
                     "flight_number": {"type": "string"},
                     "class": {"type": "string"},
-                    "departure_date": {
+                    "departure_datetime": {
                         "type": "string",
-                        "pattern": "^[A-Za-z]{3}, [A-Za-z]{3} \\d{2}, \\d{4}$",
+                        "pattern": "^[A-Za-z]{3}, [A-Za-z]{3} \\d{2}, \\d{4} \\d{2}:\\d{2} [AP]M$",
                     },
-                    "departure_time": {
+                    "arrival_datetime": {
                         "type": "string",
-                        "pattern": "^\\d{2}:\\d{2} [APM]{2}$",
+                        "pattern": "^[A-Za-z]{3}, [A-Za-z]{3} \\d{2}, \\d{4} \\d{2}:\\d{2} [AP]M$",
                     },
-                    "arrival_date": {
+                    "departure_city": {
                         "type": "string",
-                        "pattern": "^[A-Za-z]{3}, [A-Za-z]{3} \\d{2}, \\d{4}$",
+                        "pattern": "^[A-Za-z ]+,[ ]?[A-Z]{2},[ ]?[A-Z]{2}$",
                     },
-                    "arrival_time": {
+                    "departure_city_airport_code": {
                         "type": "string",
-                        "pattern": "^\\d{2}:\\d{2} [APM]{2}$",
+                        "pattern": "^[A-Z]{3}$",
                     },
-                    "departure_city": {"type": "string"},
-                    "arrival_city": {"type": "string"},
+                    "arrival_city": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z ]+,[ ]?[A-Z]{2},[ ]?[A-Z]{2}$",
+                    },
+                    "arrival_city_airport_code": {
+                        "type": "string",
+                        "pattern": "^[A-Z]{3}$",
+                    },
                     "operated_by": {"type": "string"},
                 },
                 "required": [
                     "flight_number",
                     "class",
-                    "departure_date",
-                    "departure_time",
-                    "arrival_date",
-                    "arrival_time",
+                    "departure_datetime",
+                    "arrival_datetime",
                     "departure_city",
                     "arrival_city",
-                    "operated_by",
                 ],
             },
         },
