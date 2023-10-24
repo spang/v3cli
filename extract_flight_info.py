@@ -197,7 +197,7 @@ def extract_flight_details_anthropic(email_text):
     return None
 
 
-def extract_flight_details(email_text, anthropic):
+def extract_flight_details(email_text, anthropic=False):
     """Return JSON of flight details from email text"""
     use_this_version = email_text
 
