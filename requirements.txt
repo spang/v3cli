@@ -1,3 +1,7 @@
 arrow
 click
 nylas>=6.0.0b2
+anthropic
+openai
+tiktoken
+strip_tags
